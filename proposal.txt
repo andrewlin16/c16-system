@@ -1,0 +1,13 @@
+Team Members: Andrew Lin
+
+Proposal:
+
+I will be building a simple computer system on the FPGA, including a simple
+processor, video chip, and sound chip. The processor will use either the c16 ISA
+we've built on in class or possibly my own simple RISC-type ISA, and it will be
+at least a basic pipelined processor in terms of complexity. The video chip will
+probably use simple tile-based graphics and will utilize the HDMI port on our
+boards. The sound chip will generate and mix simple sound waves and output
+through the board's audio output port. To be able to utilize the video and sound
+chips, the processor will interface with the chips through memory-mapped I/O,
+and the processor will need interrupt support to utilize the chips well.
