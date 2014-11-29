@@ -36,11 +36,11 @@ module sample_generator(clk, sw, key, sample);
 			width <= sw[2:0];
 		end
 
-		if (counter == 1) begin
-			counter <= period;
+		if (counter >= period) begin
+			counter <= 1;
 			pulse_ctr <= (pulse_ctr == 7 ? 0 : pulse_ctr + 1);
 		end else begin
-			counter <= counter - 1;
+			counter <= counter + 1;
 		end
 
 		flag <= (pulse_ctr <= (width & 3'h3));
