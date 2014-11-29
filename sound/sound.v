@@ -119,7 +119,7 @@ module sound(
 	end
 
 	always @(posedge CLOCK_50_B5B) begin
-		if (mclk_counter == 3) begin
+		if (mclk_counter == 1) begin
 			mclk <= !mclk;
 			mclk_counter <= 0;
 		end else begin
@@ -128,7 +128,7 @@ module sound(
 	end
 
 	always @(posedge mclk) begin
-		if (bclk_counter == 3) begin
+		if (bclk_counter == 1) begin
 			bclk <= !bclk;
 			bclk_counter <= 0;
 		end else begin
