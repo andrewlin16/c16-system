@@ -144,32 +144,37 @@ module sound(
 	always @(negedge bclk) begin
 		if (state == 0) begin
 			sample <= 24'h800000;
-			pblrc <= 1;
+			pblrc <= 0;
+			pbdat <= sample[23];
+			sample_ctr <= 23;
 			state <= 1;
 		end else if (state == 1) begin
 			pblrc <= 0;
-			sample_ctr <= 23;
-			state <= 2;
-		end else if (state == 2) begin
 			pbdat <= sample[sample_ctr];
-			sample_ctr <= sample_ctr - 1;
-			state <= (sample_ctr == 0 ? 3 : 2);
-		end else if (state == 3) begin
-			pblrc <= 1;
-			sample_ctr <= 23;
-			state <= 4;
-		end else if (state == 4) begin
-			pbdat <= sample[sample_ctr];
-			sample_ctr <= sample_ctr - 1;
-			state <= (sample_ctr == 0 ? 5 : 4);
-		end else begin
-			if (subsample == 255) begin
-				sample <= sample + 1;
-				subsample <= 0;
+
+			if (sample_ctr == 0) begin
+				sample_ctr <= 23;
+				state <= 2;
 			end else begin
-				subsample <= subsample + 1;
+				sample_ctr <= sample_ctr - 1;
+				state <= 1;
 			end
+		end else if (state == 2) begin
 			pblrc <= 1;
+			pbdat <= sample[sample_ctr];
+
+			if (sample_ctr == 0) begin
+				sample_ctr <= 23;
+				state <= 3;
+			end else begin
+				sample_ctr <= sample_ctr - 1;
+				state <= 2;
+			end
+		end else begin
+			sample <= sample + 151183;
+			pblrc <= 1;
+			pbdat <= 0;
+			sample_ctr <= 23;
 			state <= 1;
 		end
 	end
@@ -183,8 +188,8 @@ module sound(
 	// debug
 	sevensegment ss3(sample[23:20], HEX3);
 	sevensegment ss2(sample[19:16], HEX2);
-	sevensegment ss1(sample[7:4], HEX1);
-	sevensegment ss0(sample[3:0], HEX0);
+	sevensegment ss1(sample[15:12], HEX1);
+	sevensegment ss0(sample[11:8], HEX0);
 
 	assign LEDR[0] = AUD_XCK;
 	assign LEDR[1] = AUD_BCLK;
