@@ -137,7 +137,7 @@ module sound(
 	end
 
 	// sample generator
-	sample_generator sg(mclk, gen_sample);
+	sample_generator sg(mclk, SW, KEY, gen_sample);
 
 	// state machine
 	initial begin
@@ -191,10 +191,10 @@ module sound(
 	assign AUD_DACLRCK = pblrc;
 
 	// debug
-	sevensegment ss3(sample[23:20], HEX3);
-	sevensegment ss2(sample[19:16], HEX2);
-	sevensegment ss1(sample[15:12], HEX1);
-	sevensegment ss0(sample[11:8], HEX0);
+	sevensegment ss3(sample[15:12], HEX3);
+	sevensegment ss2(sample[11:8], HEX2);
+	sevensegment ss1(sample[7:4], HEX1);
+	sevensegment ss0(sample[3:0], HEX0);
 
 	assign LEDR[0] = AUD_XCK;
 	assign LEDR[1] = AUD_BCLK;
