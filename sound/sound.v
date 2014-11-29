@@ -97,6 +97,8 @@ module sound(
 	reg bclk;
 	reg [1:0] bclk_counter;
 
+	wire [23:0] gen_sample;
+
 	reg [23:0] sample;
 	reg [7:0] subsample;
 	reg [4:0] sample_ctr;
@@ -134,6 +136,9 @@ module sound(
 		end
 	end
 
+	// sample generator
+	sample_generator sg(mclk, gen_sample);
+
 	// state machine
 	initial begin
 		state = 0;
@@ -143,7 +148,7 @@ module sound(
 
 	always @(negedge bclk) begin
 		if (state == 0) begin
-			sample <= 24'h800000;
+			sample <= gen_sample;
 			pblrc <= 0;
 			pbdat <= sample[23];
 			sample_ctr <= 23;
@@ -171,7 +176,7 @@ module sound(
 				state <= 2;
 			end
 		end else begin
-			sample <= sample + 151183;
+			sample <= gen_sample;
 			pblrc <= 1;
 			pbdat <= 0;
 			sample_ctr <= 23;
