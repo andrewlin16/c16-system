@@ -5,9 +5,9 @@
 set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CGXFC5C6F27C7
 set_global_assignment -name TOP_LEVEL_ENTITY "sound"
-set_global_assignment -name ORIGINAL_QUARTUS_VERSION "14.0"
-set_global_assignment -name LAST_QUARTUS_VERSION "14.0"
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "20:20:31 NOVEMBER 27,2014"
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "13.0"
+set_global_assignment -name LAST_QUARTUS_VERSION 14.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "14:43:54 NOVEMBER 29,2014"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 672
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 8_H6
@@ -105,6 +105,66 @@ set_location_assignment PIN_AE19 -to SW[9]
 set_instance_assignment -name IO_STANDARD "1.2 V" -to SW[9]
 
 #============================================================
+# SEG7
+#============================================================
+set_location_assignment PIN_V19 -to HEX0[0]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[0]
+set_location_assignment PIN_V18 -to HEX0[1]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[1]
+set_location_assignment PIN_V17 -to HEX0[2]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[2]
+set_location_assignment PIN_W18 -to HEX0[3]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[3]
+set_location_assignment PIN_Y20 -to HEX0[4]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[4]
+set_location_assignment PIN_Y19 -to HEX0[5]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[5]
+set_location_assignment PIN_Y18 -to HEX0[6]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[6]
+set_location_assignment PIN_AA18 -to HEX1[0]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX1[0]
+set_location_assignment PIN_AD26 -to HEX1[1]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX1[1]
+set_location_assignment PIN_AB19 -to HEX1[2]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX1[2]
+set_location_assignment PIN_AE26 -to HEX1[3]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX1[3]
+set_location_assignment PIN_AE25 -to HEX1[4]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX1[4]
+set_location_assignment PIN_AC19 -to HEX1[5]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX1[5]
+set_location_assignment PIN_AF24 -to HEX1[6]
+set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX1[6]
+set_location_assignment PIN_AD7 -to HEX2[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[0]
+set_location_assignment PIN_AD6 -to HEX2[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[1]
+set_location_assignment PIN_U20 -to HEX2[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[2]
+set_location_assignment PIN_V22 -to HEX2[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[3]
+set_location_assignment PIN_V20 -to HEX2[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[4]
+set_location_assignment PIN_W21 -to HEX2[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[5]
+set_location_assignment PIN_W20 -to HEX2[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[6]
+set_location_assignment PIN_Y24 -to HEX3[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[0]
+set_location_assignment PIN_Y23 -to HEX3[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[1]
+set_location_assignment PIN_AA23 -to HEX3[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[2]
+set_location_assignment PIN_AA22 -to HEX3[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[3]
+set_location_assignment PIN_AC24 -to HEX3[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[4]
+set_location_assignment PIN_AC23 -to HEX3[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[5]
+set_location_assignment PIN_AC22 -to HEX3[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[6]
+
+#============================================================
 # Audio
 #============================================================
 set_location_assignment PIN_C7 -to AUD_ADCLRCK
@@ -134,6 +194,7 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to I2C_SDA
 
 
 set_global_assignment -name VERILOG_FILE sound.v
+set_global_assignment -name VERILOG_FILE sevenseg.v
 set_global_assignment -name SDC_FILE sound.SDC
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85

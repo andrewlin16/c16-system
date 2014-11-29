@@ -6,49 +6,195 @@
 module sound(
 
 	//////////// CLOCK //////////
-	input 		          		CLOCK_125_p,
-	input 		          		CLOCK_50_B5B,
-	input 		          		CLOCK_50_B6A,
-	input 		          		CLOCK_50_B7A,
-	input 		          		CLOCK_50_B8A,
+	CLOCK_125_p,
+	CLOCK_50_B5B,
+	CLOCK_50_B6A,
+	CLOCK_50_B7A,
+	CLOCK_50_B8A,
 
 	//////////// LED //////////
-	output		     [7:0]		LEDG,
-	output		     [9:0]		LEDR,
+	LEDG,
+	LEDR,
 
 	//////////// KEY //////////
-	input 		          		CPU_RESET_n,
-	input 		     [3:0]		KEY,
+	CPU_RESET_n,
+	KEY,
 
 	//////////// SW //////////
-	input 		     [9:0]		SW,
+	SW,
+
+	//////////// SEG7 //////////
+	HEX0,
+	HEX1,
+	HEX2,
+	HEX3,
 
 	//////////// Audio //////////
-	input 		          		AUD_ADCDAT,
-	inout 		          		AUD_ADCLRCK,
-	inout 		          		AUD_BCLK,
-	output		          		AUD_DACDAT,
-	inout 		          		AUD_DACLRCK,
-	output		          		AUD_XCK,
+	AUD_ADCDAT,
+	AUD_ADCLRCK,
+	AUD_BCLK,
+	AUD_DACDAT,
+	AUD_DACLRCK,
+	AUD_XCK,
 
 	//////////// I2C for Audio/HDMI-TX/Si5338/HSMC //////////
-	output		          		I2C_SCL,
-	inout 		          		I2C_SDA
+	I2C_SCL,
+	I2C_SDA 
 );
 
+//=======================================================
+//  PARAMETER declarations
+//=======================================================
+
+
+//=======================================================
+//  PORT declarations
+//=======================================================
+
+	//////////// CLOCK //////////
+	input CLOCK_125_p;
+	input CLOCK_50_B5B;
+	input CLOCK_50_B6A;
+	input CLOCK_50_B7A;
+	input CLOCK_50_B8A;
+
+	//////////// LED //////////
+	output [7:0] LEDG;
+	output [9:0] LEDR;
+
+	//////////// KEY //////////
+	input CPU_RESET_n;
+	input [3:0] KEY;
+
+	//////////// SW //////////
+	input [9:0] SW;
+
+	//////////// SEG7 //////////
+	output [6:0] HEX0;
+	output [6:0] HEX1;
+	output [6:0] HEX2;
+	output [6:0] HEX3;
+
+	//////////// Audio //////////
+	input AUD_ADCDAT;
+	inout AUD_ADCLRCK;
+	inout AUD_BCLK;
+	output AUD_DACDAT;
+	inout AUD_DACLRCK;
+	output AUD_XCK;
+
+	//////////// I2C for Audio/HDMI-TX/Si5338/HSMC //////////
+	output I2C_SCL;
+	inout I2C_SDA;
 
 
 //=======================================================
 //  REG/WIRE declarations
 //=======================================================
 
+	reg mclk;
+	reg [1:0] mclk_counter;
+	reg bclk;
+	reg [1:0] bclk_counter;
 
+	reg [23:0] sample;
+	reg [7:0] subsample;
+	reg [4:0] sample_ctr;
 
+	reg pblrc;
+	reg pbdat;
+
+	reg [2:0] state;
 
 //=======================================================
 //  Structural coding
 //=======================================================
 
+	// Clock dividers
+	initial begin
+		mclk <= 0;
+		mclk_counter <= 0;
+	end
 
+	always @(posedge CLOCK_50_B5B) begin
+		if (mclk_counter == 3) begin
+			mclk <= !mclk;
+			mclk_counter <= 0;
+		end else begin
+			mclk_counter <= mclk_counter + 1;
+		end
+	end
 
+	always @(posedge mclk) begin
+		if (bclk_counter == 3) begin
+			bclk <= !bclk;
+			bclk_counter <= 0;
+		end else begin
+			bclk_counter <= bclk_counter + 1;
+		end
+	end
+
+	// state machine
+	initial begin
+		state = 0;
+		pblrc <= 1;
+		pbdat <= 0;
+	end
+
+	always @(negedge bclk) begin
+		if (state == 0) begin
+			sample <= 24'h800000;
+			pblrc <= 1;
+			state <= 1;
+		end else if (state == 1) begin
+			pblrc <= 0;
+			sample_ctr <= 23;
+			state <= 2;
+		end else if (state == 2) begin
+			pbdat <= sample[sample_ctr];
+			sample_ctr <= sample_ctr - 1;
+			state <= (sample_ctr == 0 ? 3 : 2);
+		end else if (state == 3) begin
+			pblrc <= 1;
+			sample_ctr <= 23;
+			state <= 4;
+		end else if (state == 4) begin
+			pbdat <= sample[sample_ctr];
+			sample_ctr <= sample_ctr - 1;
+			state <= (sample_ctr == 0 ? 5 : 4);
+		end else begin
+			if (subsample == 255) begin
+				sample <= sample + 1;
+				subsample <= 0;
+			end else begin
+				subsample <= subsample + 1;
+			end
+			pblrc <= 1;
+			state <= 1;
+		end
+	end
+
+	// audio
+	assign AUD_XCK = mclk;
+	assign AUD_BCLK = bclk;
+	assign AUD_DACDAT = pbdat;
+	assign AUD_DACLRCK = pblrc;
+
+	// debug
+	sevensegment ss3(sample[23:20], HEX3);
+	sevensegment ss2(sample[19:16], HEX2);
+	sevensegment ss1(sample[7:4], HEX1);
+	sevensegment ss0(sample[3:0], HEX0);
+
+	assign LEDR[0] = AUD_XCK;
+	assign LEDR[1] = AUD_BCLK;
+	assign LEDR[2] = AUD_DACLRCK;
+	assign LEDR[3] = AUD_DACDAT;
+	assign LEDR[4] = AUD_ADCLRCK;
+	assign LEDR[5] = AUD_ADCDAT;
+
+	assign LEDG[0] = 1;
+	assign LEDG[1] = CLOCK_50_B5B;
+	assign LEDG[2] = mclk;
+	assign LEDG[3] = bclk;
 endmodule
