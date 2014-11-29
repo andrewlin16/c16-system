@@ -6,16 +6,19 @@ module sample_generator(clk, sw, key, sample);
 
 	// sound generation settings
 	reg [15:0] period;
-	reg [7:0] volume;
+	reg [4:0] volume;
+	reg [2:0] width;
 
 	// internal sound generation regs
 	reg [23:0] counter;
+	reg [3:0] pulse_ctr;
 	reg flag;
 	reg [23:0] sample;
 
 	initial begin
 		period <= 14205;	// 16'h377D
-		volume <= 255;		// 8'hFF
+		volume <= 8;
+		width <= 3;
 
 		counter <= 1;
 		flag <= 0;
@@ -28,16 +31,19 @@ module sample_generator(clk, sw, key, sample);
 		end else if (!key[0]) begin
 			period[7:0] <= sw[7:0];
 		end else if (!key[2]) begin
-			volume <= sw[7:0];
+			volume <= sw[4:0];
+		end else if (!key[3]) begin
+			width <= sw[2:0];
 		end
 
 		if (counter == 1) begin
 			counter <= period;
-			flag <= !flag;
+			pulse_ctr <= (pulse_ctr == 7 ? 0 : pulse_ctr + 1);
 		end else begin
 			counter <= counter - 1;
 		end
 
-		sample <= (flag ? {8'hFF, ~volume, 8'hFF} : {8'h00, volume, 8'h00});
+		flag <= (pulse_ctr <= (width & 3'h3));
+		sample <= (flag ? {8'hFF, ~volume, 11'h7FF} : {8'h00, volume, 11'h000});
 	end
 endmodule
