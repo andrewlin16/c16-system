@@ -93,20 +93,19 @@ module sound(
 //=======================================================
 
 	reg mclk;
-	reg [1:0] mclk_counter;
+	reg mclk_counter;
 	reg bclk;
-	reg [1:0] bclk_counter;
+	reg bclk_counter;
 
 	wire [23:0] gen_sample;
 
 	reg [23:0] sample;
-	reg [7:0] subsample;
 	reg [4:0] sample_ctr;
 
 	reg pblrc;
 	reg pbdat;
 
-	reg [2:0] state;
+	reg [1:0] state;
 
 //=======================================================
 //  Structural coding
@@ -116,6 +115,8 @@ module sound(
 	initial begin
 		mclk <= 0;
 		mclk_counter <= 0;
+		bclk <= 0;
+		bclk_counter <= 0;
 	end
 
 	always @(posedge CLOCK_50_B5B) begin
@@ -141,7 +142,7 @@ module sound(
 
 	// state machine
 	initial begin
-		state = 0;
+		state <= 0;
 		pblrc <= 1;
 		pbdat <= 0;
 	end
