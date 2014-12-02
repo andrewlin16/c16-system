@@ -91,6 +91,7 @@ module video(
 //  REG/WIRE declarations
 //=======================================================
 
+	// HDMI module in/out
 	reg clk25;
 
 	wire [11:0] x;
@@ -99,6 +100,15 @@ module video(
 	reg [7:0] r;
 	reg [7:0] g;
 	reg [7:0] b;
+
+	// internal picture regs
+	reg [11:0] paldef[0:15];
+	reg [3:0] tiledef[0:16383];
+	reg [5:0] tile[0:299];
+
+	integer ty, tx, t;
+	integer py, px, p;
+	integer c;
 
 //=======================================================
 //  Structural coding
@@ -109,7 +119,22 @@ module video(
 		clk25 <= !clk25;
 	end
 
+	// picture output
+	always @(*) begin
+		ty = y >> 4;
+		tx = x >> 4;
+		t = tile[ty*20+tx];
+
+		py = y & 11'b00000001111;
+		px = x & 11'b00000001111;
+		p = tiledef[t << 8 | y << 4 | x];
+
+		c = paldef[p];
+		r = {c[11:8], 4'b0000};
+		g = {c[7:4], 4'b0000};
+		b = {c[3:0], 4'b0000};
+	end
+
 	// hdmi
 	hdmi hdmiout(clk25, CPU_RESET_n, x, y, r, g, b, HDMI_TX_CLK, HDMI_TX_D, HDMI_TX_DE, HDMI_TX_HS, HDMI_TX_INT, HDMI_TX_VS);
-
 endmodule
