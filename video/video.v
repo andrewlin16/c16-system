@@ -91,8 +91,25 @@ module video(
 //  REG/WIRE declarations
 //=======================================================
 
+	reg clk25;
+
+	wire [11:0] x;
+	wire [11:0] y;
+
+	reg [7:0] r;
+	reg [7:0] g;
+	reg [7:0] b;
+
 //=======================================================
 //  Structural coding
 //=======================================================
+
+	// clock divider
+	always @(posedge CLOCK_50_B5B) begin
+		clk25 <= !clk25;
+	end
+
+	// hdmi
+	hdmi hdmiout(clk25, CPU_RESET_n, x, y, r, g, b, HDMI_TX_CLK, HDMI_TX_D, HDMI_TX_DE, HDMI_TX_HS, HDMI_TX_INT, HDMI_TX_VS);
 
 endmodule
