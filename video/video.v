@@ -146,7 +146,7 @@ module video(
 
 		py = y & 11'b00000001111;
 		px = x & 11'b00000001111;
-		p = tiledef[t << 8 | y << 4 | x];
+		p = tiledef[t << 8 | py << 4 | px];
 
 		c = paldef[p];
 		r = {c[11:8], 4'b0000};
