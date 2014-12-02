@@ -157,6 +157,12 @@ module video(
 	// hdmi
 	hdmi hdmiout(clk25, CPU_RESET_n, x, y, r, g, b, HDMI_TX_CLK, HDMI_TX_D, HDMI_TX_DE, HDMI_TX_HS, HDMI_TX_INT, HDMI_TX_VS);
 
+	// debugs
+	sevensegment ss3(HDMI_TX_D[15:12], HEX3);
+	sevensegment ss2(HDMI_TX_D[11:8], HEX2);
+	sevensegment ss1(HDMI_TX_D[7:4], HEX1);
+	sevensegment ss0(HDMI_TX_D[3:0], HEX0);
+
 	assign LEDG[0] = HDMI_TX_CLK;
 	assign LEDG[1] = HDMI_TX_DE;
 	assign LEDG[2] = HDMI_TX_HS;
