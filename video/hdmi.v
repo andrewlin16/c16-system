@@ -14,8 +14,8 @@ module hdmi(
 
 parameter CYCLE_DELAY = 0;
 
-parameter WIDTH = 640;
-parameter HEIGHT = 480;
+parameter WIDTH = 320;
+parameter HEIGHT = 240;
 parameter XDIV = 2;
 parameter YDIV = 2;
 parameter XSTART = 0;
@@ -52,8 +52,6 @@ input HDMI_TX_INT;
 reg [23:0] hdmi_data;
 reg [1:0] hdmi_de;
 
-reg [11:0] hdmi_hprecount;
-reg [11:0] hdmi_vprecount;
 reg [11:0] hdmi_hcount;
 reg [11:0] hdmi_vcount;
 wire hdmi_hactive = hdmi_hcount >= HSTART && hdmi_hcount < HEND;
