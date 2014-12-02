@@ -110,6 +110,8 @@ module video(
 	integer py, px, p;
 	integer c;
 
+	integer i;
+
 //=======================================================
 //  Structural coding
 //=======================================================
@@ -120,6 +122,23 @@ module video(
 	end
 
 	// picture output
+	initial begin
+		for (i = 0; i < 16; i = i + 1) begin
+			paldef[i] <= 0;
+		end
+
+		for (i = 0; i < 4096; i = i + 1) begin
+			tiledef[i] <= 0;
+			tiledef[i+4096] <= 0;
+			tiledef[i+8192] <= 0;
+			tiledef[i+12288] <= 0;
+		end
+
+		for (i = 0; i < 300; i = i + 1) begin
+			tile[i] <= 0;
+		end
+	end
+
 	always @(*) begin
 		ty = y >> 4;
 		tx = x >> 4;
