@@ -156,4 +156,9 @@ module video(
 
 	// hdmi
 	hdmi hdmiout(clk25, CPU_RESET_n, x, y, r, g, b, HDMI_TX_CLK, HDMI_TX_D, HDMI_TX_DE, HDMI_TX_HS, HDMI_TX_INT, HDMI_TX_VS);
+
+	assign LEDG[0] = HDMI_TX_CLK;
+	assign LEDG[1] = HDMI_TX_DE;
+	assign LEDG[2] = HDMI_TX_HS;
+	assign LEDG[3] = HDMI_TX_VS;
 endmodule
