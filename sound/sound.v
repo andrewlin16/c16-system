@@ -137,8 +137,8 @@ module sound(
 		end
 	end
 
-	// sample generator
-	sample_generator sg(CLOCK_50_B5B, SW, KEY, gen_sample);
+	// sound generator
+	sound_generator sg(CLOCK_50_B5B, SW, KEY, gen_sample);
 
 	// state machine
 	initial begin

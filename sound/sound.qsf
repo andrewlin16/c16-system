@@ -195,6 +195,8 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to I2C_SDA
 
 set_global_assignment -name VERILOG_FILE sound.v
 set_global_assignment -name VERILOG_FILE sevenseg.v
+set_global_assignment -name VERILOG_FILE sound_generator.v
+set_global_assignment -name VERILOG_FILE sound_channel.v
 set_global_assignment -name SDC_FILE sound.SDC
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
