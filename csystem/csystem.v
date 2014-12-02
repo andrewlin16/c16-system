@@ -107,10 +107,105 @@ module csystem(
 //  REG/WIRE declarations
 //=======================================================
 
+	// audio
+
+	reg snd_mclk;
+	reg snd_mclk_counter;
+	reg snd_bclk;
+	reg snd_bclk_counter;
+
+	wire [23:0] snd_gen_sample;
+
+	reg [23:0] snd_sample;
+	reg [4:0] snd_sample_ctr;
+
+	reg snd_pblrc;
+	reg snd_pbdat;
+
+	reg [1:0] snd_state;
 
 //=======================================================
 //  Structural coding
 //=======================================================
 
+	// audio clock dividers
+	initial begin
+		snd_mclk <= 0;
+		snd_mclk_counter <= 0;
+		snd_bclk <= 0;
+		snd_bclk_counter <= 0;
+	end
+
+	always @(posedge CLOCK_50_B5B) begin
+		if (snd_mclk_counter == 1) begin
+			snd_mclk <= !snd_mclk;
+			snd_mclk_counter <= 0;
+		end else begin
+			snd_mclk_counter <= snd_mclk_counter + 1;
+		end
+	end
+
+	always @(posedge snd_mclk) begin
+		if (snd_bclk_counter == 1) begin
+			snd_bclk <= !snd_bclk;
+			snd_bclk_counter <= 0;
+		end else begin
+			snd_bclk_counter <= snd_bclk_counter + 1;
+		end
+	end
+
+	// sound generator
+	sound_generator sg(CLOCK_50_B5B, SW, KEY, snd_gen_sample);
+
+	// audio state machine
+	initial begin
+		snd_state <= 0;
+		snd_pblrc <= 1;
+		snd_pbdat <= 0;
+	end
+
+	always @(negedge snd_bclk) begin
+		if (snd_state == 0) begin
+			snd_sample <= snd_gen_sample;
+			snd_pblrc <= 0;
+			snd_pbdat <= snd_sample[23];
+			snd_sample_ctr <= 23;
+			snd_state <= 1;
+		end else if (snd_state == 1) begin
+			snd_pblrc <= 0;
+			snd_pbdat <= snd_sample[snd_sample_ctr];
+
+			if (snd_sample_ctr == 0) begin
+				snd_sample_ctr <= 23;
+				snd_state <= 2;
+			end else begin
+				snd_sample_ctr <= snd_sample_ctr - 1;
+				snd_state <= 1;
+			end
+		end else if (snd_state == 2) begin
+			snd_pblrc <= 1;
+			snd_pbdat <= snd_sample[snd_sample_ctr];
+
+			if (snd_sample_ctr == 0) begin
+				snd_sample_ctr <= 23;
+				snd_state <= 3;
+			end else begin
+				snd_sample_ctr <= snd_sample_ctr - 1;
+				snd_state <= 2;
+			end
+		end else begin
+			snd_sample <= snd_gen_sample;
+			snd_pblrc <= 1;
+			snd_pbdat <= 0;
+			snd_sample_ctr <= 23;
+			snd_state <= 1;
+		end
+	end
+
+	// audio outputs
+	assign AUD_XCK = snd_mclk;
+	assign AUD_BCLK = snd_bclk;
+	assign AUD_DACDAT = snd_pbdat;
+	assign AUD_DACLRCK = snd_pblrc;
 
 endmodule
