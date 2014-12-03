@@ -1,6 +1,12 @@
-module sound_generator(clk, resetn, sample);
+module sound_generator(clk, resetn, wen, ch_sel, ch_param, ch_val, sample);
 	input clk;
 	input resetn;
+
+	input wen;
+	input [1:0] ch_sel;
+	input [1:0] ch_param;
+	input [15:0] ch_val;
+
 	output [23:0] sample;
 
 	// sound channel parameters
@@ -34,6 +40,12 @@ module sound_generator(clk, resetn, sample);
 				volume[ch] <= 0;
 				width[ch] <= 0;
 			end
+		end else if (wen) begin
+			case (ch_param)
+				0: period[ch_sel] <= ch_val;
+				1: volume[ch_sel] <= ch_val[4:0];
+				2: width[ch_sel] <= ch_val[2:0];
+			endcase
 		end
 	end
 endmodule

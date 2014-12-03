@@ -169,7 +169,7 @@ module csystem(
 	end
 
 	// sound generator
-	sound_generator sg(CLOCK_50_B5B, CPU_RESET_n, snd_gen_sample);
+	sound_generator sg(CLOCK_50_B5B, CPU_RESET_n, 0, 0, 0, 0, snd_gen_sample);
 
 	// audio state machine
 	initial begin
