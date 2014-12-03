@@ -6,12 +6,11 @@ set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CGXFC5C6F27C7
 set_global_assignment -name TOP_LEVEL_ENTITY "csystem"
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "13.0"
-set_global_assignment -name LAST_QUARTUS_VERSION "13.0"
+set_global_assignment -name LAST_QUARTUS_VERSION 14.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "15:42:30 DECEMBER 02,2014"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 672
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 8_H6
-set_global_assignment -name SDC_FILE csystem.SDC
 
 #============================================================
 # CLOCK
@@ -255,3 +254,15 @@ set_instance_assignment -name IO_STANDARD "2.5 V" -to I2C_SDA
 # End of pin assignments by Terasic System Builder
 #============================================================
 
+
+set_global_assignment -name VERILOG_FILE video.v
+set_global_assignment -name VERILOG_FILE sound_generator.v
+set_global_assignment -name VERILOG_FILE sound_channel.v
+set_global_assignment -name VERILOG_FILE sevenseg.v
+set_global_assignment -name VERILOG_FILE hdmi.v
+set_global_assignment -name VERILOG_FILE csystem.v
+set_global_assignment -name SDC_FILE csystem.SDC
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"

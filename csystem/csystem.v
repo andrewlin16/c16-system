@@ -124,6 +124,16 @@ module csystem(
 
 	reg [1:0] snd_state;
 
+	// video
+
+	reg vid_clk;
+
+	wire hdmi_clk;
+	wire [23:0] hdmi_d;
+	wire hdmi_de;
+	wire hdmi_hs;
+	wire hdmi_vs;
+
 //=======================================================
 //  Structural coding
 //=======================================================
@@ -208,4 +218,29 @@ module csystem(
 	assign AUD_DACDAT = snd_pbdat;
 	assign AUD_DACLRCK = snd_pblrc;
 
+	// video clock divider
+	initial begin
+		vid_clk <= 0;
+	end
+
+	always @(posedge CLOCK_50_B5B) begin
+		vid_clk <= !vid_clk;
+	end
+
+	// video module
+	video video_out(vid_clk, CPU_RESET_n, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
+
+	// video outputs
+	assign HDMI_TX_CLK = hdmi_clk;
+	assign HDMI_TX_D = hdmi_d;
+	assign HDMI_TX_DE = hdmi_de;
+	assign HDMI_TX_HS = hdmi_hs;
+	assign HDMI_TX_VS = hdmi_vs;
+
+	// debug
+
+	assign LEDG[0] = HDMI_TX_CLK;
+	assign LEDG[1] = HDMI_TX_DE;
+	assign LEDG[2] = HDMI_TX_HS;
+	assign LEDG[3] = HDMI_TX_VS;
 endmodule
