@@ -134,6 +134,15 @@ module csystem(
 	wire hdmi_hs;
 	wire hdmi_vs;
 
+	// c16 processor
+
+	wire snd_wen;
+	wire vid_wen;
+	wire [1:0] w_param;
+	wire [10:0] w_index;
+	wire [15:0] w_val;
+	wire [33:0] debug;
+
 //=======================================================
 //  Structural coding
 //=======================================================
@@ -232,10 +241,15 @@ module csystem(
 	assign HDMI_TX_HS = hdmi_hs;
 	assign HDMI_TX_VS = hdmi_vs;
 
-	// debug
+	// c16 processor module
+	c16 proc(CLOCK_50_B5B, CPU_RESET_n, KEY, SW, snd_wen, w_param, w_index, w_val, debug);
 
-	assign LEDG[0] = HDMI_TX_CLK;
-	assign LEDG[1] = HDMI_TX_DE;
-	assign LEDG[2] = HDMI_TX_HS;
-	assign LEDG[3] = HDMI_TX_VS;
+	// debug
+	assign LEDR = debug[33:24];
+	assign LEDG = debug[23:16];
+
+	sevensegment ss3(debug[15:12], HEX3);
+	sevensegment ss2(debug[11:8], HEX2);
+	sevensegment ss1(debug[7:4], HEX1);
+	sevensegment ss0(debug[3:0], HEX0);
 endmodule
