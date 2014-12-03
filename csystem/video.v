@@ -60,9 +60,9 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 	end
 
 	always @(*) begin
-		my = y >> 4;
-		mx = x >> 4;
-		m = my * 20 + mx;
+		my = y >> 3;
+		mx = x >> 3;
+		m = my * 40 + mx;
 		t = tilemap[m];
 
 		py = y & 11'b00000000111;
