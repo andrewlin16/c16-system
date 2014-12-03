@@ -1,6 +1,11 @@
-module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
+module video(clk, resetn, wen, w_param, w_index, w_val, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 	input clk;
 	input resetn;
+
+	input wen;
+	input [1:0] w_param;
+	input [10:0] w_index;
+	input [15:0] w_val;
 
 	output hdmi_clk;
 	output [23:0] hdmi_d;
@@ -90,6 +95,20 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 				palmap[i] <= 0;
 				tilemap[i] <= 0;
 			end
+		end else if (wen) begin
+			case (w_param)
+				0: paldef[w_index[3:0]] <= w_val[11:0];
+				1: begin
+					case (w_index[1:0])
+						0: tiledef[w_index[9:2]][15:0] <= w_val;
+						1: tiledef[w_index[9:2]][31:16] <= w_val;
+						2: tiledef[w_index[9:2]][47:32] <= w_val;
+						3: tiledef[w_index[9:2]][63:48] <= w_val;
+					endcase
+				end
+				2: palmap[w_index] <= w_val[7:0];
+				3: tilemap[w_index] <= w_val[5:0];
+			endcase
 		end
 	end
 
