@@ -20,11 +20,12 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 
 	// internal picture regs
 	reg [11:0] paldef[0:15];
-	reg [3:0] tiledef[0:16383];
+	reg [255:0] tiledef[0:63];
+	reg [7:0] palmap[0:299];
 	reg [5:0] tilemap[0:299];
 
-	integer ty, tx, t;
-	integer py, px, p;
+	integer my, mx, m, t;
+	integer py, px, pp, p;
 	integer c;
 
 	integer i;
@@ -48,26 +49,26 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 			paldef[i] <= i;
 		end
 
-		for (i = 0; i < 4096; i = i + 1) begin
-			tiledef[i] <= i;
-			tiledef[i+4096] <= i;
-			tiledef[i+8192] <= i;
-			tiledef[i+12288] <= i;
+		for (i = 0; i < 64; i = i + 1) begin
+			tiledef[i] <= i << 2;
 		end
 
 		for (i = 0; i < 300; i = i + 1) begin
+			palmap[i] <= i;
 			tilemap[i] <= i;
 		end
 	end
 
 	always @(*) begin
-		ty = y >> 4;
-		tx = x >> 4;
-		t = tilemap[ty*20+tx];
+		my = y >> 4;
+		mx = x >> 4;
+		m = my * 20 + mx;
+		t = tilemap[m];
 
 		py = y & 11'b00000001111;
 		px = x & 11'b00000001111;
-		p = tiledef[t << 8 | py << 4 | px];
+		pp = tiledef[t][py << 4 | px];
+		p = (pp ? palmap[m][7:4] : palmap[m][3:0]);
 
 		c = paldef[p];
 		r = {c[11:8], 4'b0000};
@@ -81,14 +82,12 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 				paldef[i] <= 0;
 			end
 
-			for (i = 0; i < 4096; i = i + 1) begin
+			for (i = 0; i < 64; i = i + 1) begin
 				tiledef[i] <= 0;
-				tiledef[i+4096] <= 0;
-				tiledef[i+8192] <= 0;
-				tiledef[i+12288] <= 0;
 			end
 
 			for (i = 0; i < 300; i = i + 1) begin
+				palmap[i] <= 0;
 				tilemap[i] <= 0;
 			end
 		end
