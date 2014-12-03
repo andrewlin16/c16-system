@@ -267,3 +267,4 @@ set_global_assignment -name VERILOG_FILE sevenseg.v
 set_global_assignment -name VERILOG_FILE hdmi.v
 set_global_assignment -name VERILOG_FILE csystem.v
 set_global_assignment -name SDC_FILE csystem.SDC
+set_global_assignment -name QIP_FILE memory.qip

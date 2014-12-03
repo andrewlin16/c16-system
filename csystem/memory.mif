@@ -1,0 +1,17 @@
+WIDTH=16;
+DEPTH=8192;
+
+ADDRESS_RADIX=DEC;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+    0: c900;
+    1: c204;
+    2: b109;
+    3: ba06;
+    4: c100;
+    5: ca00;
+    6: a109;
+    7: aa02;
+    8: ffff;
+END;
