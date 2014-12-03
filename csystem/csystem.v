@@ -138,6 +138,10 @@ module csystem(
 //  Structural coding
 //=======================================================
 
+	// audio module -- for whatever reason this has to be here. I've tried
+	// taking it out into its own module several times and none of them have
+	// worked.
+
 	// audio clock dividers
 	initial begin
 		snd_mclk <= 0;
@@ -165,7 +169,7 @@ module csystem(
 	end
 
 	// sound generator
-	sound_generator sg(CLOCK_50_B5B, SW, KEY, snd_gen_sample);
+	sound_generator sg(CLOCK_50_B5B, snd_gen_sample);
 
 	// audio state machine
 	initial begin
@@ -218,17 +222,9 @@ module csystem(
 	assign AUD_DACDAT = snd_pbdat;
 	assign AUD_DACLRCK = snd_pblrc;
 
-	// video clock divider
-	initial begin
-		vid_clk <= 0;
-	end
-
-	always @(posedge CLOCK_50_B5B) begin
-		vid_clk <= !vid_clk;
-	end
 
 	// video module
-	video video_out(vid_clk, CPU_RESET_n, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
+	video video_out(CLOCK_50_B5B, CPU_RESET_n, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 
 	// video outputs
 	assign HDMI_TX_CLK = hdmi_clk;

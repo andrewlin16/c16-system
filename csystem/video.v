@@ -9,6 +9,8 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 	output hdmi_vs;
 
 	// HDMI module in/out
+	reg vid_clk;
+
 	wire [11:0] x;
 	wire [11:0] y;
 
@@ -30,6 +32,15 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 //=======================================================
 //  Structural coding
 //=======================================================
+
+	// video clock divider
+	initial begin
+		vid_clk <= 0;
+	end
+
+	always @(posedge clk) begin
+		vid_clk <= !vid_clk;
+	end
 
 	// picture output
 	initial begin
@@ -65,5 +76,5 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 	end
 
 	// hdmi
-	hdmi hdmiout(clk, resetn, x, y, r, g, b, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, 0, hdmi_vs);
+	hdmi hdmiout(vid_clk, resetn, x, y, r, g, b, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, 0, hdmi_vs);
 endmodule
