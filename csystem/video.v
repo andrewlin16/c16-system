@@ -75,6 +75,25 @@ module video(clk, resetn, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 		b = {c[3:0], 4'b0000};
 	end
 
+	always @(posedge clk) begin
+		if (!resetn) begin
+			for (i = 0; i < 16; i = i + 1) begin
+				paldef[i] <= 0;
+			end
+
+			for (i = 0; i < 4096; i = i + 1) begin
+				tiledef[i] <= 0;
+				tiledef[i+4096] <= 0;
+				tiledef[i+8192] <= 0;
+				tiledef[i+12288] <= 0;
+			end
+
+			for (i = 0; i < 300; i = i + 1) begin
+				tilemap[i] <= 0;
+			end
+		end
+	end
+
 	// hdmi
 	hdmi hdmiout(vid_clk, resetn, x, y, r, g, b, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, 0, hdmi_vs);
 endmodule

@@ -169,7 +169,7 @@ module csystem(
 	end
 
 	// sound generator
-	sound_generator sg(CLOCK_50_B5B, snd_gen_sample);
+	sound_generator sg(CLOCK_50_B5B, CPU_RESET_n, snd_gen_sample);
 
 	// audio state machine
 	initial begin
@@ -221,7 +221,6 @@ module csystem(
 	assign AUD_BCLK = snd_bclk;
 	assign AUD_DACDAT = snd_pbdat;
 	assign AUD_DACLRCK = snd_pblrc;
-
 
 	// video module
 	video video_out(CLOCK_50_B5B, CPU_RESET_n, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);

@@ -1,5 +1,6 @@
-module sound_generator(clk, sample);
+module sound_generator(clk, resetn, sample);
 	input clk;
+	input resetn;
 	output [23:0] sample;
 
 	// sound channel parameters
@@ -21,8 +22,18 @@ module sound_generator(clk, sample);
 	initial begin
 		for (ch = 0; ch < 4; ch = ch + 1) begin
 			period[ch] <= 14205;	// 16'h377D
-			volume[ch] <= 0;
+			volume[ch] <= 4;
 			width[ch] <= 3;
+		end
+	end
+
+	always @(posedge clk) begin
+		if (!resetn) begin
+			for (ch = 0; ch < 4; ch = ch + 1) begin
+				period[ch] <= 16'hFFFF;
+				volume[ch] <= 0;
+				width[ch] <= 0;
+			end
 		end
 	end
 endmodule
