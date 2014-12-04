@@ -204,11 +204,11 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					state <= s_checkint;
 				end
 				s_xmul: begin
-					// TODO: undefined for now
+					// unsupported
 					state <= s_checkint;
 				end
 				s_xdiv: begin
-					// TODO: undefined for now
+					// unsupported
 					state <= s_checkint;
 				end
 				s_xld1: begin
