@@ -2,7 +2,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	input clk;
 	input resetn;
 
-	input [4:0] key;
+	input [3:0] key;
 	input [9:0] sw;
 
 	output snd_wen;
