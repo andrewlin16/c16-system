@@ -250,7 +250,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					state <= s_checkint;
 				end
 				s_xbr: begin
-					if (vd == 0 && op == 4'hE || vd != 0 && op == 4'hF) begin
+					if (vd != 0 && op == 4'hE || vd == 0 && op == 4'hF) begin
 						pc <= va + vb;
 					end
 					state <= s_checkint;
