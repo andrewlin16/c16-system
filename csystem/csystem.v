@@ -242,7 +242,7 @@ module csystem(
 	assign HDMI_TX_VS = hdmi_vs;
 
 	// c16 processor module
-	c16 proc(CLOCK_50_B5B, CPU_RESET_n, KEY, SW, snd_wen, w_param, w_index, w_val, debug);
+	c16 proc(KEY[0], CPU_RESET_n, KEY, SW, snd_wen, w_param, w_index, w_val, debug);
 
 	// debug
 	assign LEDR = debug[33:24];
