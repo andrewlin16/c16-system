@@ -197,7 +197,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 							4'h5: regs[rd] <= va | vb;
 							4'h6: regs[rd] <= va ^ vb;
 							4'h8: regs[rd] <= va << vb[3:0];
-							4'h9: regs[rd] <= (vb[4] ? $signed(va) >>> vb[3:0] : va >> vb[3:0]);
+							4'h9: regs[rd] <= va >> vb[3:0];	// note: arithmetic not supported
 							4'hC: regs[rd] <= va + vb;
 						endcase
 					end
