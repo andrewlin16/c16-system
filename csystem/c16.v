@@ -234,6 +234,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					pc <= isr;
 					int_flag <= 1;
 				end
+				state <= s_fetch1;
 			end
 		endcase
 
