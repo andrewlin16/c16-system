@@ -118,152 +118,156 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 		w_index <= 0;
 		w_val <= 0;
 
-		// state machine
-		case (state)
-			s_init: begin
-				pc <= 0;
-				regs[7] <= 0;
-				state <= s_fetch1;
-			end
-			s_fetch1: begin
-				pc <= pc + 1;
-				state <= s_fetch2;
-				state_wait <= 1;
-			end
-			s_fetch2: begin
-				inst <= mem_out;
-				if (!state_wait) begin
-					state <= s_decode;
+		if (!resetn) begin
+			state <= s_init;
+		end else begin
+			// state machine
+			case (state)
+				s_init: begin
+					pc <= 0;
+					regs[7] <= 0;
+					state <= s_fetch1;
 				end
-				state_wait <= 0;
-			end
-			s_decode: begin
-				op <= `d_op;
-				rd <= `d_rd;
-				ra <= `d_ra;
+				s_fetch1: begin
+					pc <= pc + 1;
+					state <= s_fetch2;
+					state_wait <= 1;
+				end
+				s_fetch2: begin
+					inst <= mem_out;
+					if (!state_wait) begin
+						state <= s_decode;
+					end
+					state_wait <= 0;
+				end
+				s_decode: begin
+					op <= `d_op;
+					rd <= `d_rd;
+					ra <= `d_ra;
 
-				vd <= regs[`d_rd];
+					vd <= regs[`d_rd];
 
-				if (`d_format) begin
-					if (`d_op >= 4'hA) begin	// ld, st, lea, call, brnz, brz
-						va <= pc;
-						vb <= `d_imm8;
+					if (`d_format) begin
+						if (`d_op >= 4'hA) begin	// ld, st, lea, call, brnz, brz
+							va <= pc;
+							vb <= `d_imm8;
+						end else begin
+							va <= regs[`d_ra];
+							vb <= regs[`d_rb];
+						end
 					end else begin
 						va <= regs[`d_ra];
-						vb <= regs[`d_rb];
+						vb <= `d_imm5;
 					end
-				end else begin
-					va <= regs[`d_ra];
-					vb <= `d_imm5;
-				end
 
-				if (`d_op <= 4'h6 || `d_op == 4'hC) begin
-					state <= s_xalu;
-				end else if (`d_op == 4'h7) begin
-					state <= (`d_format ? s_xsti : s_xrti);
-				end else if (`d_op == 4'h8) begin
-					state <= (`d_format ? s_xmul : s_xalu);
-				end else if (`d_op == 4'h9) begin
-					state <= (`d_format ? s_xdiv : s_xalu);
-				end else if (`d_op == 4'hA) begin
-					state <= s_xld1;
-				end else if (`d_op == 4'hB) begin
-					state <= s_xst1;
-				end else if (`d_op == 4'hD) begin
-					state <= s_xcall;
-				end else if (`d_op == 4'hE || `d_op == 4'hF) begin
-					state <= s_xbr;
-				end else begin
+					if (`d_op <= 4'h6 || `d_op == 4'hC) begin
+						state <= s_xalu;
+					end else if (`d_op == 4'h7) begin
+						state <= (`d_format ? s_xsti : s_xrti);
+					end else if (`d_op == 4'h8) begin
+						state <= (`d_format ? s_xmul : s_xalu);
+					end else if (`d_op == 4'h9) begin
+						state <= (`d_format ? s_xdiv : s_xalu);
+					end else if (`d_op == 4'hA) begin
+						state <= s_xld1;
+					end else if (`d_op == 4'hB) begin
+						state <= s_xst1;
+					end else if (`d_op == 4'hD) begin
+						state <= s_xcall;
+					end else if (`d_op == 4'hE || `d_op == 4'hF) begin
+						state <= s_xbr;
+					end else begin
+						state <= s_checkint;
+					end
+				end
+				s_xalu: begin
+					if (rd != 7) begin
+						case (op)
+							4'h0: regs[rd] <= va + vb;
+							4'h1: regs[rd] <= va - vb;
+							4'h2: regs[rd] <= ($signed(va) < $signed(vb) ? 1 : 0);
+							4'h3: regs[rd] <= (va < vb ? 1 : 0);
+							4'h4: regs[rd] <= va & vb;
+							4'h5: regs[rd] <= va | vb;
+							4'h6: regs[rd] <= va ^ vb;
+							4'h8: regs[rd] <= va << vb[3:0];
+							4'h9: regs[rd] <= (vb[4] ? $signed(va) >>> vb[3:0] : va >> vb[3:0]);
+							4'hC: regs[rd] <= va + vb;
+						endcase
+					end
 					state <= s_checkint;
 				end
-			end
-			s_xalu: begin
-				if (rd != 7) begin
-					case (op)
-						4'h0: regs[rd] <= va + vb;
-						4'h1: regs[rd] <= va - vb;
-						4'h2: regs[rd] <= ($signed(va) < $signed(vb) ? 1 : 0);
-						4'h3: regs[rd] <= (va < vb ? 1 : 0);
-						4'h4: regs[rd] <= va & vb;
-						4'h5: regs[rd] <= va | vb;
-						4'h6: regs[rd] <= va ^ vb;
-						4'h8: regs[rd] <= va << vb[3:0];
-						4'h9: regs[rd] <= (vb[4] ? $signed(va) >>> vb[3:0] : va >> vb[3:0]);
-						4'hC: regs[rd] <= va + vb;
-					endcase
+				s_xmul: begin
+					// TODO: undefined for now
+					state <= s_checkint;
 				end
-				state <= s_checkint;
-			end
-			s_xmul: begin
-				// TODO: undefined for now
-				state <= s_checkint;
-			end
-			s_xdiv: begin
-				// TODO: undefined for now
-				state <= s_checkint;
-			end
-			s_xld1: begin
-				state <= s_xld2;
-				state_wait <= 1;
-			end
-			s_xld2: begin
-				if (rd != 7) begin
+				s_xdiv: begin
+					// TODO: undefined for now
+					state <= s_checkint;
+				end
+				s_xld1: begin
+					state <= s_xld2;
+					state_wait <= 1;
+				end
+				s_xld2: begin
+					if (rd != 7) begin
+						if (addr & 16'h8000) begin
+							// TODO: do mmio stuff here
+							regs[rd] <= 0;
+						end else begin
+							regs[rd] <= mem_out;
+						end
+					end
+					if (!state_wait) begin
+						state <= s_checkint;
+					end
+					state_wait <= 0;
+				end
+				s_xst1: begin
+					state <= s_xst2;
+					state_wait <= 1;
+				end
+				s_xst2: begin
 					if (addr & 16'h8000) begin
 						// TODO: do mmio stuff here
-						regs[rd] <= 0;
-					end else begin
-						regs[rd] <= mem_out;
 					end
+					if (!state_wait) begin
+						state <= s_checkint;
+					end
+					state_wait <= 0;
 				end
-				if (!state_wait) begin
-					state <= s_checkint;
-				end
-				state_wait <= 0;
-			end
-			s_xst1: begin
-				state <= s_xst2;
-				state_wait <= 1;
-			end
-			s_xst2: begin
-				if (addr & 16'h8000) begin
-					// TODO: do mmio stuff here
-				end
-				if (!state_wait) begin
-					state <= s_checkint;
-				end
-				state_wait <= 0;
-			end
-			s_xcall: begin
-				if (rd != 7) begin
-					regs[rd] <= pc;
-				end
-				pc <= va + vb;
-				state <= s_checkint;
-			end
-			s_xbr: begin
-				if (vd == 0 && op == 4'hE || vd != 0 && op == 4'hF) begin
+				s_xcall: begin
+					if (rd != 7) begin
+						regs[rd] <= pc;
+					end
 					pc <= va + vb;
+					state <= s_checkint;
 				end
-				state <= s_checkint;
-			end
-			s_xsti: begin
-				isr <= vd;
-				state <= s_checkint;
-			end
-			s_xrti: begin
-				pc <= intpc;
-				int_flag <= 0;
-				state <= s_checkint;
-			end
-			s_checkint: begin
-				if (isr != 0 && !int_flag && int_trig) begin
-					intpc <= pc;
-					pc <= isr;
-					int_flag <= 1;
+				s_xbr: begin
+					if (vd == 0 && op == 4'hE || vd != 0 && op == 4'hF) begin
+						pc <= va + vb;
+					end
+					state <= s_checkint;
 				end
-				state <= s_fetch1;
-			end
-		endcase
+				s_xsti: begin
+					isr <= vd;
+					state <= s_checkint;
+				end
+				s_xrti: begin
+					pc <= intpc;
+					int_flag <= 0;
+					state <= s_checkint;
+				end
+				s_checkint: begin
+					if (isr != 0 && !int_flag && int_trig) begin
+						intpc <= pc;
+						pc <= isr;
+						int_flag <= 1;
+					end
+					state <= s_fetch1;
+				end
+			endcase
+		end
 
 		debug <= {pc[9:0], 4'h0, state, inst};
 	end
