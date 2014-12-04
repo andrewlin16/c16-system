@@ -129,6 +129,14 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 				s_init: begin
 					pc <= 0;
 					regs[7] <= 0;
+					regs[6] <= 0;
+					regs[5] <= 0;
+					regs[4] <= 0;
+					regs[3] <= 0;
+					regs[2] <= 0;
+					regs[1] <= 0;
+					regs[0] <= 0;
+
 					state <= s_fetch1;
 
 					isr <= 0;
