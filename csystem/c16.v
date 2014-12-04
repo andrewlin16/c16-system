@@ -127,6 +127,9 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					pc <= 0;
 					regs[7] <= 0;
 					state <= s_fetch1;
+
+					isr <= 0;
+					int_flag <= 0;
 				end
 				s_fetch1: begin
 					pc <= pc + 1;
