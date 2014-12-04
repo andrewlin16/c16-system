@@ -1,5 +1,5 @@
 Registers:
--Fetch/mem: PC, addr, inst, M
+-Fetch/mem: PC, addr, inst, M, RE, WE
 -Decode: op, rd, ra, vd, va, vb
 -General purpose registers: R
 -Next state: ns
@@ -7,19 +7,20 @@ Registers:
 
 Defaults:
 ns = ns + 1;
+RE = 0;
 WE = 0;
 
-0 (init): PC = 0
-1 (fetch1): addr = PC; PC = PC + 1;
+0 (init): PC = 0; ISR = 0; R[7] = 0;
+1 (fetch1): addr = PC; RE = 1; PC = PC + 1;
 2 (fetch2): inst = M[addr];
 3 (decode): op = inst[15:12]; set rd, ra, vd, va, vb; ns = f(inst[15:12]);
 
 4 (x_alu): R[rd] = va op vb; ns = checkint;
 5 (x_muldiv): R[rd] = va op1 vb; R[ra] = va op2 vb; ns = checkint;
-6 (x_ld1): addr = va + vb;
+6 (x_ld1): addr = va + vb; RE = 1;
 7 (x_ld2): R[rd] = M[addr]; ns = checkint;
-8 (x_st1): addr = va + vb; WE = 1;
-9 (x_st2): M[addr] = vd; ns = checkint;
+8 (x_st1): addr = va + vb; WE = in_mmio(va+vb);
+9 (x_st2): M[addr] = vd, or do mmio write; ns = checkint;
 10 (x_call): R[rd] = PC; PC = va + vb; ns = checkint;
 11 (x_br): if (vd == 0 && op == brz || vd != 0 && op == brnz) PC = va + vb; ns = checkint;
 12 (x_sti): ISR = vd; ns = checkint;
