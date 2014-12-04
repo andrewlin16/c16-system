@@ -226,6 +226,6 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 			end
 		endcase
 
-		debug <= {pc[9:0], 4'h0, state, 16'h00};
+		debug <= {pc[9:0], 4'h0, state, inst};
 	end
 endmodule
