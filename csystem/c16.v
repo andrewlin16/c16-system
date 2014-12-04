@@ -88,7 +88,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	always @(posedge clk) begin
 		// default values
 		re <= 0;
-		we <= 1;
+		we <= 0;
 
 		snd_wen <= 0;
 		vid_wen <= 0;
