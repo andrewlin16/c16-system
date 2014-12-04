@@ -51,16 +51,16 @@ module video(clk, resetn, wen, w_param, w_index, w_val, hdmi_clk, hdmi_d, hdmi_d
 	// picture output
 	initial begin
 		for (i = 0; i < 16; i = i + 1) begin
-			paldef[i] <= i;
+			paldef[i] <= 0;
 		end
 
 		for (i = 0; i < 64; i = i + 1) begin
-			tiledef[i] <= i;
+			tiledef[i] <= 0;
 		end
 
 		for (i = 0; i < 1200; i = i + 1) begin
-			palmap[i] <= i;
-			tilemap[i] <= i;
+			palmap[i] <= 0;
+			tilemap[i] <= 0;
 		end
 	end
 

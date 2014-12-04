@@ -27,9 +27,9 @@ module sound_generator(clk, resetn, wen, ch_sel, ch_param, ch_val, sample);
 
 	initial begin
 		for (ch = 0; ch < 4; ch = ch + 1) begin
-			period[ch] <= 14205;	// 16'h377D
-			volume[ch] <= 4;
-			width[ch] <= 3;
+			period[ch] <= 16'hFFFF;
+			volume[ch] <= 0;
+			width[ch] <= 0;
 		end
 	end
 
