@@ -74,6 +74,17 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	reg [15:0] w_val;
 	reg [33:0] debug;
 
+	// memory
+	memory mem(addr, clk, vd, re, we, mem_out);
+
+	initial begin
+		state <= s_init;
+		re <= 0;
+		we <= 0;
+		snd_wen <= 0;
+		vid_wen <= 0;
+	end
+
 	always @(posedge clk) begin
 		// default values
 		re <= 0;
