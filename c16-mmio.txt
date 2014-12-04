@@ -1,0 +1,29 @@
+Memory-mapped I/O:
+
+Main memory is 0x0000-0x1FFF. Everything memory-mapped is accessible at
+0x8000-0xFFFF.
+
+Load: read board inputs (switches and keys)
+-10XX XXXX XXXX XXX0 (0x8000): switches
+-10XX XXXX XXXX XXX1 (0x8001): keys
+
+Store: write to sound or video registers
+-110X XXXX XXXX ccpp (0xC000-0xC00F): sound registers
+	-c: channel select
+	-p: param select
+		-00: period (16-bit)
+		-01: volume (5-bit)
+		-10: width/mode (3-bit)
+-111p piii iiii iiii (0xE000-0xFFFF): video registers
+	-p: param select
+		-00: palette color definitions (12-bit values, 16 addresses (4-bit))
+		-01: tile definitions (64-bit values, 64 addresses (6-bit), or 256
+		16-bit values)
+		-10: palette map (8-bit values, 1200 addresses (11-bit))
+		-11: tile map (6-bit values, 1200 addresses (11-bit))
+	-i: index select
+
+(Note: these mappings are more strict than they actually are implented. For
+example, bit 14 is only designated in design so that the input space doesn't
+overlap with the output space. In implementation, load/store doesn't even look
+at bit 14.)

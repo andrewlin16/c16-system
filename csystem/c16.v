@@ -225,9 +225,8 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 				end
 				s_xld2: begin
 					if (rd != 7) begin
-						if (addr & 16'h8000) begin
-							// TODO: do mmio stuff here
-							regs[rd] <= 0;
+						if (addr[15]) begin
+							regs[rd] <= (addr[0]) ? key : sw;
 						end else begin
 							regs[rd] <= mem_out;
 						end
@@ -242,8 +241,17 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					state_wait <= 1;
 				end
 				s_xst2: begin
-					if (addr & 16'h8000) begin
-						// TODO: do mmio stuff here
+					if (addr[15]) begin
+						if (addr[13]) begin
+							vid_wen <= 1;
+							w_param <= addr[12:11];
+							w_index <= addr[10:0];
+						end else begin
+							snd_wen <= 1;
+							w_param <= addr[1:0];
+							w_index <= addr[3:2];
+						end
+						w_val <= vd;
 					end
 					if (!state_wait) begin
 						state <= s_checkint;
