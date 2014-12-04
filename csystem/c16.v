@@ -79,7 +79,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	reg [15:0] ss_out;
 
 	// memory
-	memory mem(addr, clk, vd, re, we, mem_out);
+	memory mem(addr[12:0], clk, vd, re, we, mem_out);
 
 	initial begin
 		state <= s_init;
@@ -100,11 +100,11 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 			end
 			s_xld1: begin
 				addr <= va + vb;
-				re <= ((va + vb) & 16'h8000 ? 1 : 0);
+				re <= ((va + vb) & 16'h8000 ? 0 : 1);
 			end
 			s_xst1: begin
 				addr <= va + vb;
-				we <= ((va + vb) & 16'h8000 ? 1 : 0);
+				we <= ((va + vb) & 16'h8000 ? 0 : 1);
 			end
 			default: begin
 				addr <= 16'hXXXX;
