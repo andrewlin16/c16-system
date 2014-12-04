@@ -73,7 +73,10 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	reg [1:0] w_param;
 	reg [10:0] w_index;
 	reg [15:0] w_val;
-	reg [33:0] debug;
+	wire [33:0] debug;
+
+	// debug
+	reg [15:0] ss_out;
 
 	// memory
 	memory mem(addr, clk, vd, re, we, mem_out);
@@ -271,7 +274,16 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 				end
 			endcase
 		end
-
-		debug <= {pc[9:0], 4'h0, state, inst};
 	end
+
+	// debugging
+	always @(*) begin
+		if (sw[9]) begin
+			ss_out <= regs[sw[8:6]];
+		end else begin
+			ss_out <= inst;
+		end
+	end
+
+	assign debug = {pc[9:0], 4'h0, state, ss_out};
 endmodule
