@@ -280,6 +280,8 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	always @(*) begin
 		if (sw[9]) begin
 			ss_out <= regs[sw[8:6]];
+		end else if (sw[5]) begin
+			ss_out <= sw[4] ? va : vb;
 		end else begin
 			ss_out <= inst;
 		end
