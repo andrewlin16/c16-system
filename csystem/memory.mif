@@ -5,10 +5,26 @@ ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-	0000: dd01;	-- call r5, x02
-	0001: 7654;	-- 0x7654
-	0002: a0a0;	-- ld r0, r5+0 (r0 = 0x7654)
-	0003: 01ff;	-- set r1 = 0xffff
-	0004: b900;	-- st r1, pc+1
-	[0005..1fff]: 0000;
+	-- init
+	0000: 377d;				-- (data; writes to r7, so essentially nop)
+	0001: a1e0;				-- r1 = 0x377d (440 Hz)
+	0002: 02e4;				-- r2 = 4
+	0003: 03ec;				-- r3 = 0xc000
+	0004: 836c;
+	0005: b160;				-- 0xc000 = 0x377d
+	0006: b261;				-- 0xc001 = 4
+
+	-- cycle-spin delay
+	0007: 00e0;				-- r0 = 0
+	[0008..007f]: 0000;		-- nop
+	0080: 0001;				-- r0 = r0 + 1
+	0081: e0e8;				-- pc = 8 if r0 != 0
+
+	-- cycle channel width/mode
+
+	0082: 0241;				-- r2 = r2 + 1
+	0083: 4247;				-- r2 = r2 & 0b00111
+	0084: b262;				-- 0xc002 = r2
+	0085: f7e8;				-- pc = 8
+	[0083..1fff]: 0000;
 END;
