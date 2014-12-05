@@ -21,10 +21,9 @@ CONTENT BEGIN
 	0081: e0e8;				-- pc = 8 if r0 != 0
 
 	-- cycle channel width/mode
-
 	0082: 0241;				-- r2 = r2 + 1
 	0083: 4247;				-- r2 = r2 & 0b00111
 	0084: b262;				-- 0xc002 = r2
 	0085: f7e8;				-- pc = 8
-	[0083..1fff]: 0000;
+	[0086..1fff]: 0000;
 END;
