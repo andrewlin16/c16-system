@@ -43,7 +43,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	// processor regs
 	reg [15:0] regs[7:0];
 	reg [3:0] state;
-	reg state_wait;
+	reg [1:0] state_wait;
 
 	// fetch/mem
 	reg [15:0] pc;
@@ -89,31 +89,10 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 		vid_wen <= 0;
 	end
 
-	always @(*) begin
-		re <= 0;
-		we <= 0;
-
-		case (state)
-			s_fetch1: begin
-				addr <= pc;
-				re <= 1;
-			end
-			s_xld1: begin
-				addr <= va + vb;
-				re <= ((va + vb) & 16'h8000 ? 0 : 1);
-			end
-			s_xst1: begin
-				addr <= va + vb;
-				we <= ((va + vb) & 16'h8000 ? 0 : 1);
-			end
-			default: begin
-				addr <= 16'hXXXX;
-			end
-		endcase
-	end
-
 	always @(posedge clk) begin
 		// default values
+		re <= 0;
+		we <= 0;
 		snd_wen <= 0;
 		vid_wen <= 0;
 
@@ -143,16 +122,18 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					int_flag <= 0;
 				end
 				s_fetch1: begin
+					addr <= pc;
+					re <= 1;
 					pc <= pc + 1;
 					state <= s_fetch2;
-					state_wait <= 1;
+					state_wait <= 2;
 				end
 				s_fetch2: begin
 					inst <= mem_out;
 					if (!state_wait) begin
 						state <= s_decode;
 					end
-					state_wait <= 0;
+					state_wait <= state_wait - 1;
 				end
 				s_decode: begin
 					op <= `d_op;
@@ -220,8 +201,10 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					state <= s_checkint;
 				end
 				s_xld1: begin
+					addr <= va + vb;
+					re <= ((va + vb) & 16'h8000 ? 0 : 1);
 					state <= s_xld2;
-					state_wait <= 1;
+					state_wait <= 2;
 				end
 				s_xld2: begin
 					if (rd != 7) begin
@@ -234,11 +217,13 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					if (!state_wait) begin
 						state <= s_checkint;
 					end
-					state_wait <= 0;
+					state_wait <= state_wait - 1;
 				end
 				s_xst1: begin
+					addr <= va + vb;
+					we <= ((va + vb) & 16'h8000 ? 0 : 1);
 					state <= s_xst2;
-					state_wait <= 1;
+					state_wait <= 2;
 				end
 				s_xst2: begin
 					if (addr[15]) begin
@@ -256,7 +241,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 					if (!state_wait) begin
 						state <= s_checkint;
 					end
-					state_wait <= 0;
+					state_wait <= state_wait - 1;
 				end
 				s_xcall: begin
 					if (rd != 7) begin
