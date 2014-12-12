@@ -236,11 +236,34 @@ Just to visualize, this is what tiledef[0:3] looks like:
 When rendering the pixel at x=0 and y=0, we access tile 0. The map index we
 access is calculated as m = (x>>3) * 40 + (y>>3). From this index, we can get
 the palette indexes and tile index to look at from palmap[m] and tilemap[m]. We
-get the 64-bit tile definition td = tilemap[m]. Then, we can calculate the tile
-definition index ti = (y & 7) << 3 | (x & 7) and get the tile bit, t = td[ti].
+get the tile index ti = tilemap[m]. Then, we can calculate the tile definition
+index i = (y & 7) << 3 | (x & 7) and get the tile bit, t = tiledef[ti][i].
 This represents the bit of the tile at that pixel location. We also look up
 palmap at this tile location, pp = palmap[m]. If t = 1, then we set the palette
 index pi = pp[7:4], otherwise we set pi = pp[3:0] as the palette index. Finally,
 we can look up the resulting color of the pixel in the palette map, outputting
 paldef[pi] as the color of the pixel. This color gets sent to the HDMI driver
 that Chris Haster wrote.
+
+Going through these steps, we get:
+
+m = (0 >> 3) * 40 + (0 >> 3) = 0
+ti = tilemap[0] = 0
+i = (0 & 7) << 3 | (0 & 7) = 0
+t = tiledef[0][0] = 1
+pp = palmap[0] = 0x34
+pi = pp[7:4] = 0x3
+output = paldef[3] = 0xF00 (red)
+
+The whole tile should look like:
+
++--------+
+|rbrbrbrb|
+|brbrbrbr|
+|rbrbrbrb|
+|brbrbrbr|
+|rbrbrbrb|
+|brbrbrbr|
+|rbrbrbrb|
+|brbrbrbr|
++--------+
