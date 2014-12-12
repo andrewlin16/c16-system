@@ -5,25 +5,38 @@ ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-	-- init
-	0000: 377d;				-- (data; writes to r7, so essentially nop)
-	0001: a1e0;				-- r1 = 0x377d (440 Hz)
-	0002: 02e4;				-- r2 = 4
-	0003: 03ec;				-- r3 = 0xc000
-	0004: 836c;
-	0005: b160;				-- 0xc000 = 0x377d
-	0006: b261;				-- 0xc001 = 4
+	-- Set tile 0 to 0xAAAAAAAAAAAAAAAA (checkerboard tile)
+	0000: aaaa;				-- (data)
+	0001: a1e0;				-- r1 = 0xAAAA
+	0002: 02fd;				-- r2 = 0xE800 (tile def base address)
+	0003: 824b;
+	0004: b140;				-- [0xE800] = 0xAAAA
+	0005: b141;				-- [0xE801] = 0xAAAA
+	0006: b142;				-- [0xE802] = 0xAAAA
+	0007: b143;				-- [0xE803] = 0xAAAA
 
-	-- cycle-spin delay
-	0007: 00e0;				-- r0 = 0
-	[0008..007f]: 0000;		-- nop
-	0080: 0001;				-- r0 = r0 + 1
-	0081: e0e8;				-- pc = 8 if r0 != 0
+	-- Fill pallete map to 0x01 (pal 0, pal 1)
+	0008: 02fe;				-- r2 = 0xF000 (pal map base address)
+	0009: 824b;
+	000a: cb41;				-- r3 = 1200 (0x04B0)
+	000b: 836c;
+	000c: 0b43;				-- r3 = r2 + 1200 (end address)
+	000d: 04e1;				-- r4 = 0x01
+	-- loop:
+	000e: b440;				-- [r2] = 0x01;
+	000f: 0241;				-- r2 = r2 + 1
+	0010: 1e43;				-- r6 = r2 - r3
+	0011: eefc;				-- pc = loop if r6 != 0 (r2 != r3)
 
-	-- cycle channel width/mode
-	0082: 0241;				-- r2 = r2 + 1
-	0083: 4247;				-- r2 = r2 & 0b00111
-	0084: b262;				-- 0xc002 = r2
-	0085: f7e8;				-- pc = 8
-	[0086..1fff]: 0000;
+	-- Load palette color with input from switches
+	0012: 02ee;				-- r2 = 0xE000 (pal def base address)
+	0013: 824c;
+	0014: 03e8;				-- r3 = 0x8000 (input base address)
+	0015: 836c;
+	-- loop2:
+	0016: a460;				-- r4 = [0x8000] (switches)
+	0017: b440;				-- [0xE000] = r4
+	0018: fffd;				-- pc = loop2
+
+	[0019..1fff]: 0000;
 END;
