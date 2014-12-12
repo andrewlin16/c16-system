@@ -1,0 +1,246 @@
+I. Overview
+
+My project consisted of creating a full-featured system on top of an extended
+version of the c16 ISA we used in class. This system includes a sound chip using
+the audio codec + line out port on our board and a tile-based graphics chip
+using the HDMI transmitter + HDMI port on our board. The processor uses memory-
+mapped I/O, so the sound and graphics chips can be accessed through the st
+instruction, and the buttons and switches can be accessed through the ld
+instruction. Interrupt support was also added to the ISA, and the system is set
+to trigger an interrupt on vsync so that programs can utilize the timing of
+vsync to update the display.
+
+II. Changes to the c16 ISA
+
+Several changes were made to the original proposed c16 ISA (commit 00fba0e of
+the c16 branch of the instruction-set repository on GitHub):
+
+-The mul and div instructions were removed, as they would require complicated
+logic for instructions that were unlikely to be used in the first place.
+-shr only does logical right shifts. I couldn't figure out how to get an
+arithmetic right shift to synthesize in Verilog, so for the sake of simplicity,
+I had to limit shr to logical shift.
+-Opcode 0x7 has been replaced with set interrupt subroutine (sti) and return
+from interrupt (rti) instructions.
+
+The sti and rti instructions work as following:
+
+sti:
+-Assembly: sti rd
+-Encoding: 01111ddd00000000
+-Operation: Sets the ISR address to the value in rd.
+
+rti:
+-Assembly: rti
+-Encoding: 0111000000000000
+-Operation: Clears the interrupt bit and returns to the PC when the interrupt
+was triggered.
+
+III. Memory-Mapped I/O
+
+The address space was also modified to allow memory-mapped I/O access to the
+input and outputs to the board. The main memory address space is 0x0000-0x1FFF.
+The memory-mapped address space is accessible at 0x8000-0xFFFF.
+
+Loads can access the state of the buttons and switches on the board. The
+addresses for these are:
+
+-10XX XXXX XXXX XXX0 (0x8000): switches
+-10XX XXXX XXXX XXX1 (0x8001): keys (pressed = 0, unpressed = 1)
+
+Stores can modify the sound and graphics registers. The addresses for these are:
+
+-110X XXXX XXXX ccpp (0xC000-0xC00F): sound registers
+	-c: channel select (0-3)
+	-p: parameter select
+		-p=00: period (16-bit value)
+		-p=01: volume (5-bit value)
+		-p=10: wave mode (3-bit value)
+			-0: 12.5% duty cycle pulse wave
+			-1: 25% duty cycle pulse wave
+			-2: 37.5% duty cycle pulse wave
+			-3: 50% duty cycle pulse wave
+			-4-7: noise mode
+-111p piii iiii iiii (0xE000-0xFFFF): video registers
+	-p: parameter select
+		-p=00: palette color definitions (12-bit values, 16 indexes)
+		-p=01: tile definitions (64-bit values, 64 indexes; accessible as 256
+		16-bit values)
+		-p=10: palette map (8-bit values, 1200 indexes)
+		-p=11: tile map (6-bit values, 1200 indexes)
+	-i: index select
+
+-Palette definitions: 0xE000-0xE00F
+-Tile definitions: 0xE800-0xE8FF
+-Palette map: 0xF000-0xF4AF
+-Tile map: 0xF800-0xFCAF
+
+IV. Processor Implementation
+
+The processor is implemented using a simple state machine like we did in p4.
+There are fetch, decode, execute, and check interrupt states. Fetch takes 4
+cycles, decode takes 1 cycle, execute takes 1-4 cycles (4 cycles for memory
+operations and 1 cycle for all other operations), and check interrupt takes 1
+cycle. I decided to make the processor take 4 cycles for memory operations for
+implementation simplicity. I also originally intended to create a pipelined
+processor, but it seemed too complex to implement all instructions and
+interrupts in the pipeline (plus we never got p6 to work).
+
+Extra registers were added for interrupt support:
+
+-register to hold the address for the interrupt subroutine
+-register to hold the return PC address when an interrupt occurs
+-interrupt bit to determine whether an interrupt is being handled
+-register to signal when an interrupt occurs
+
+All execute state paths end up transitioning to the check interrupt state. The
+check interrupt state checks several conditions for interrupts. The conditions
+for triggering an interrupt are:
+
+-An interrupt subroutine was set by the program
+-The processor is not already handling an interrupt
+-An interrupt event has occured (in this case, the video output has entered the
+vsync area)
+
+When the state determines that an interrupt should be triggered, the current PC
+is stored in the return address register, the PC is set to the interrupt
+subroutine address, and the interrupt bit is set to indicate that an interrupt
+is being handled.
+
+The sti instruction sets the interrupt subroutine address. Setting this address
+to 0 will disable interrupts from occurring (so you can disable interrupts by
+executing sti r7, or 0x7f00). The rti instruction sets the PC to the return
+address and clears the interrupt bit.
+
+Memory-mapped I/O is implemented by modifying the load and store execute states.
+On any memory access, the first bit of the address is checked to see whether it
+is a memory-mapped I/O access, and the memory read/write enable is disabled if
+it is a MMIO access. For reads, the value of the keys or switches is stored into
+the destination register. For stores, the processor module outputs a write
+enable signal for the sound or graphics chip (whichever one is appropriate
+corresponding to the address of the store), the appropriate parameter and index/
+channel select bits from the address, and the value from the destination
+register.
+
+V. The Sound Chip
+
+The sound chip has 4 identical sound channels or wave generators. Each wave
+generator has period, volume, and pulse width/wave mode registers, and it can
+generate a pulse wave with varying duty cycles or noise. The sound chip combines
+the output of the 4 wave generators into a single sample which is sent to the
+audio driver.
+
+Each sound channel has an internal 15-bit clock counter and a 3-bit pulse
+counter. The clock counter is incremented each clock cycle and when it hits the
+value in its period register, the clock counter is reset and the pulse counter
+is incremented (wraps around when it hits 8). For noise mode, the sound channel
+has an internal 16-bit linear shift feedback register (LSFR) which generates a
+sequence of pseudo-random bits, and the LSFR is shifted when the clock counter
+hits the period value as well. If the channel is set to a pulse wave mode (0-3),
+the output depends on the value of the pulse counter and the pulse width set in
+the wave mode register (0 = 12.5% duty cycle, 1 = 25% duty cycle, 2 = 37.5% duty
+cycle, 3 = 50% duty cycle, or square wave). If the channel is set to noise mode
+(4-7), the output is taken from the last bit in the LSFR. Regardless of channel
+mode, the sound channel basically outputs a 1-bit wave (high or low) with a
+period determined by the period register and an amplitude determined by the
+volume register.
+
+VI. The Graphics Chip
+
+The graphics chip contains 4 main structures: the palette color definitions,
+the tile definitions, the palette map, and the tile map. It combines values from
+the 4 structures and outputs a 320x240 resolution picture. This 320x240 picture
+is split into 8x8 tiles for a 40x30 tile picture, or 1200 tiles.
+
+The palette definitions (paldef) is an array of 12-bit colors (formatted as
+rrrrggggbbbb). The array allows for 16 palette colors (addressable by 4 bits).
+
+The tile definitions (tiledef) is an array of 64-bit tiles formatted like a
+bitmap. However, since c16 uses 16-bit values, each tile is split into 4 16-bit
+subtiles. For example, the 0th tile is defined in the tiledef array like this:
+
++--------+
+|00000001| 0xE800: 0x0123
+|00100011|
++--------+
+|01000101| 0xE801: 0x4567
+|01100111|
++--------+
+|10001001| 0xE802: 0x89AB
+|10101011|
++--------+
+|11001101| 0xE803: 0xCDEF
+|11101111|
++--------+
+
+The 4 16-bit values can then be combined into a single 64-bit tile like this:
+
++--------+
+|00000001| 0xE800-0xE803: 0x0123456789ABCDEF (assuming big-endian)
+|00100011|
+|01000101|
+|01100111|
+|10001001|
+|10101011|
+|11001101|
+|11101111|
++--------+
+
+The bit values determine which color to choose from the palette based on the
+palette map. There are 64 definable tiles in the tiledef array.
+
+Each tile on the 40x30 tile screen references 2 palette entries and 1 tile
+entry. The tiles are indexed row-major, like this:
+
++--+--+--+--+--+--+--+--+--+--+--+
+| 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|10|
++--+--+--+--+--+--+--+--+--+--+--+
+|40|41|42|43|44|45|46|47|48|49|50|...
++--+--+--+--+--+--+--+--+--+--+--+
+|81|82|83|84|85|86|87|88|89|80|91|
++--+--+--+--+--+--+--+--+--+--+--+
+                 .
+                 .
+                 .
+
+The tile map (tilemap) has 1200 6-bit values indicating which tile definition to
+use from the tiledef array for the tile at the index of the tile map. The
+palette map has 1200 8-bit values, each indicating which 2 palette colors to use
+for the tile at the index of the palette map. If the pixel at the tile
+definition has a 1, it will use the upper 4 bits to index into the paldef array
+for the color of the pixel, otherwise it will use the lower 4 bits to index into
+the paldef array.
+
+There is a lot going on, so here is an example setup with the description of the
+rendering process:
+
+paldef[3] = 0xF00 (red)
+paldef[4] = 0x00F (blue)
+tiledef[0:3] = 0xAA55AA55AA55AA55AA55AA55AA55AA55 (a checkerboard pattern)
+palmap[0] = 0x34 (palette 3 when 1, palette 4 when 0)
+tilemap[0] = 0 (tile 0 as defined above)
+
+Just to visualize, this is what tiledef[0:3] looks like:
+
++--------+
+|10101010|
+|01010101|
+|10101010|
+|01010101|
+|10101010|
+|01010101|
+|10101010|
+|01010101|
++--------+
+
+When rendering the pixel at x=0 and y=0, we access tile 0. The map index we
+access is calculated as m = (x>>3) * 40 + (y>>3). From this index, we can get
+the palette indexes and tile index to look at from palmap[m] and tilemap[m]. We
+get the 64-bit tile definition td = tilemap[m]. Then, we can calculate the tile
+definition index ti = (y & 7) << 3 | (x & 7) and get the tile bit, t = td[ti].
+This represents the bit of the tile at that pixel location. We also look up
+palmap at this tile location, pp = palmap[m]. If t = 1, then we set the palette
+index pi = pp[7:4], otherwise we set pi = pp[3:0] as the palette index. Finally,
+we can look up the resulting color of the pixel in the palette map, outputting
+paldef[pi] as the color of the pixel. This color gets sent to the HDMI driver
+that Chris Haster wrote.
