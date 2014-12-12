@@ -93,7 +93,7 @@ CONTENT BEGIN
 
 	-- Main loop
 
-	0039: ffff;			-- wait while r6 = 0
+	0039: feff;			-- wait while r6 = 0
 	003a: 0b01;			-- r3 = r0 + r1
 	003b: a464;			-- r4 = [r3+4]
 	003c: 05ec;			-- r5 = 0xC000
