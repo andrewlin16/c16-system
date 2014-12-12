@@ -160,30 +160,30 @@ bitmap. However, since c16 uses 16-bit values, each tile is split into 4 16-bit
 subtiles. For example, the 0th tile is defined in the tiledef array like this:
 
 +--------+
-|00000001| 0xE800: 0x0123
-|00100011|
+|11000100| 0xE800: 0x0123
+|10000000|
 +--------+
-|01000101| 0xE801: 0x4567
-|01100111|
+|11100110| 0xE801: 0x4567
+|10100010|
 +--------+
-|10001001| 0xE802: 0x89AB
-|10101011|
+|11010101| 0xE802: 0x89AB
+|10010001|
 +--------+
-|11001101| 0xE803: 0xCDEF
-|11101111|
+|11110111| 0xE803: 0xCDEF
+|10110011|
 +--------+
 
 The 4 16-bit values can then be combined into a single 64-bit tile like this:
 
 +--------+
-|00000001| 0xE800-0xE803: 0x0123456789ABCDEF (assuming big-endian)
-|00100011|
-|01000101|
-|01100111|
-|10001001|
-|10101011|
-|11001101|
-|11101111|
+|11000100| 0xE800-0xE803: 0x0123456789ABCDEF (stored in little word endian)
+|10000000|
+|11100110|
+|10100010|
+|11010101|
+|10010001|
+|11110111|
+|10110011|
 +--------+
 
 The bit values determine which color to choose from the palette based on the
