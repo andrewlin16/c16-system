@@ -32,7 +32,7 @@ CONTENT BEGIN
 	000f: 1241;			-- r2 = r2 - 1
 	0010: eaf4;			-- pc = loop if r2 != 0
 
-	-- Load tilemap and palmap
+	-- Load "CS350C" tilemap and palmap
 
 	-- init load tile mapping + palette mapping
 	0011: a100;			-- r1 = [r0] (should be 0x1014) = 0xE9A1
@@ -51,17 +51,41 @@ CONTENT BEGIN
 	001c: 1361;			-- r3 = r3 - 1
 	001d: ebf8;			-- pc = loop if r3 != 0
 
-	-- Load palette definition
+	-- Load paldef
 
-	-- set paldef[1] = white
+	-- set paldef[1] and paldef[2] = white
 	001e: a100;			-- r1 = [r0] (should be 0x101C) = 0xE001
 	001f: a201;			-- r2 = [r0+1] = 0x0FFF
 	0020: b220;			-- [r1] = r2
+	0021: b221;			-- [r1+1] = r2
+	0022: 0002;			-- r0 = r0 + 2
+
+	-- Set center square map
+
+	-- init loop
+	0023: a100;			-- r1 = [r0] = 0xF268
+	0024: 02e8;			-- r2 = 8 (rows)
+	0025: cbfc;			-- r3 = 0x22
+	0026: a401;			-- r4 = [r0+1] = 40
+	0027: 0002;			-- r0 = r0 + 2
+
+	-- loop
+	0028: b320;			-- [r2] = r3
+	0029: b321;			-- [r2+1] = r3
+	002a: b322;			-- [r2+2] = r3
+	002b: b323;			-- [r2+3] = r3
+	002c: b324;			-- [r2+4] = r3
+	002d: b325;			-- [r2+5] = r3
+	002e: b326;			-- [r2+6] = r3
+	002f: b327;			-- [r2+7] = r3
+	0030: 0924;			-- r1 = r1 + r4
+	0031: 1241;			-- r2 = r2 - 1
+	0032: eaf5;			-- pc = loop if r2 != 0
 
 	-- Main loop
-	0021: ffff;			-- halt
+	0033: ffff;			-- halt
 
-	[0022..0fff]: 0000;
+	[0034..0fff]: 0000;
 
 	-- ============
 	-- DATA SECTION
@@ -99,9 +123,9 @@ CONTENT BEGIN
 	1012: 666e;
 	1013: 003c;
 
-	-- tilemap address start
+	-- "CS350C" tilemap address start
 	1014: f9a1;			-- 0xF800 + (10 * 40) + 17
-	-- palmap address start
+	-- "CS350C" palmap address start
 	1015: f1a1;			-- 0xF000 + (10 * 40) + 17
 
 	-- tile map - CS350C
@@ -116,5 +140,14 @@ CONTENT BEGIN
 	101c: e001;
 	101d: 0fff;			-- white
 
-	[101e..1fff]: 0000;
+	-- center square palmap address start
+	101e: f268;			-- 0xF000 + (15 * 40) + 16
+	101f: 0028;			-- 40 (cols)
+
+	-- animation colors
+	1020: 00ff;			-- cyan
+	1021: 0f0f;			-- magenta
+	1022: 0ff0;			-- yellow
+
+	[1023..1fff]: 0000;
 END;
