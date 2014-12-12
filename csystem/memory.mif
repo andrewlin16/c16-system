@@ -97,9 +97,9 @@ CONTENT BEGIN
 
 	[003a..07ff]: 0000;
 
-	-- interrupt service routine
+	-- interrupt service routine (using 07fd-07ff as temp storage)
 
-	-- store registers on "stack" (behind ISR)
+	-- save registers behind ISR
 	0800: bbfc;
 	0801: bcfc;
 	0802: bdfc;
@@ -119,7 +119,10 @@ CONTENT BEGIN
 
 	-- return
 	080e: 06e1;			-- r6 = 1
-	080f: 7000;			-- rti
+	080f: abed;			-- restore r3, r4, r5
+	0810: aced;
+	0811: aded;
+	0812: 7000;			-- rti
 
 	[0810..0fff]: 0000;
 
