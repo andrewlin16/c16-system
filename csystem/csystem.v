@@ -232,7 +232,7 @@ module csystem(
 	assign AUD_DACLRCK = snd_pblrc;
 
 	// video module
-	video video_out(CLOCK_50_B5B, CPU_RESET_n, 0, 0, 0, 0, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
+	video video_out(CLOCK_50_B5B, CPU_RESET_n, vid_wen, w_param, w_index, w_val, hdmi_clk, hdmi_d, hdmi_de, hdmi_hs, hdmi_vs);
 
 	// video outputs
 	assign HDMI_TX_CLK = hdmi_clk;
