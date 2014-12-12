@@ -16,14 +16,15 @@ WE = 0;
 3 (decode): op = inst[15:12]; set rd, ra, vd, va, vb; ns = f(inst[15:12]);
 
 4 (x_alu): R[rd] = va op vb; ns = checkint;
-5 (x_muldiv): R[rd] = va op1 vb; R[ra] = va op2 vb; ns = checkint;
-6 (x_ld1): addr = va + vb; RE = 1;
-7 (x_ld2): R[rd] = M[addr]; ns = checkint;
-8 (x_st1): addr = va + vb; WE = in_mmio(va+vb);
-9 (x_st2): M[addr] = vd, or do mmio write; ns = checkint;
-10 (x_call): R[rd] = PC; PC = va + vb; ns = checkint;
-11 (x_br): if (vd == 0 && op == brz || vd != 0 && op == brnz) PC = va + vb; ns = checkint;
-12 (x_sti): ISR = vd; ns = checkint;
-13 (x_rti): PC = INTPC; INT = 0; ns = checkint;
+5 (x_mul): (reserved)
+6 (x_div): (reserved)
+7 (x_ld1): addr = va + vb; RE = 1;
+8 (x_ld2): R[rd] = M[addr]; ns = checkint;
+9 (x_st1): addr = va + vb; WE = in_mmio(va+vb);
+10 (x_st2): M[addr] = vd, or do mmio write; ns = checkint;
+11 (x_call): R[rd] = PC; PC = va + vb; ns = checkint;
+12 (x_br): if (vd == 0 && op == brz || vd != 0 && op == brnz) PC = va + vb; ns = checkint;
+13 (x_sti): ISR = vd; ns = checkint;
+14 (x_rti): PC = INTPC; INT = 0; ns = checkint;
 
-14 (checkint): if (ISR != 0 && !INT && int_trigger) { PC = ISR; INT = 1; INTPC = PC; } ns = fetch1;
+15 (checkint): if (ISR != 0 && !INT && int_trigger) { PC = ISR; INT = 1; INTPC = PC; } ns = fetch1;
