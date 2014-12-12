@@ -133,7 +133,7 @@ CONTENT BEGIN
 	0811: aded;
 	0812: 7000;			-- rti
 
-	[0810..0fff]: 0000;
+	[0813..0fff]: 0000;
 
 	-- ============
 	-- DATA SECTION
