@@ -288,5 +288,5 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 		end
 	end
 
-	assign debug = {pc[9:0], we, re, 2'h0, state, ss_out};
+	assign debug = {pc[9:0], we, snd_wen, vid_wen, re, state, ss_out};
 endmodule
