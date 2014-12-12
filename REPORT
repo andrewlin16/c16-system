@@ -267,3 +267,16 @@ The whole tile should look like:
 |rbrbrbrb|
 |brbrbrbr|
 +--------+
+
+VII. Included Demos
+
+There are a few demos included in the demo_mif directory.
+
+-int_demo.mif: Tests the sti and rti instructions.
+-audio_demo.mif: Sets channel 0 to 440 Hz and cycles through the channel's
+pulse/noise modes.
+-video_demo.mif: Loads a checkerboard pattern onto the screen and sets the color
+of the pattern based on the switch pattern.
+-full_demo.mif: demos several features of the system. Displays "CS350C" and an
+animating box in the center which changes colors about every half second and
+plays tones about every half second.
