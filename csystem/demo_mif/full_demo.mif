@@ -63,11 +63,11 @@ CONTENT BEGIN
 	-- Set center square map
 
 	-- init loop
-	0023: a100;			-- r1 = [r0] = 0xF268
+	0023: a100;			-- r1 = [r0] (should be 0x101E) = 0xF268
 	0024: 02e8;			-- r2 = 8 (rows)
 	0025: cbfc;			-- r3 = 0x22
 	0026: a401;			-- r4 = [r0+1] = 40
-	0027: 0002;			-- r0 = r0 + 2
+	0027: 0002;			-- r0 = r0 + 2 = 0x1020
 
 	-- loop
 	0028: b320;			-- [r2] = r3
@@ -82,10 +82,46 @@ CONTENT BEGIN
 	0031: 1241;			-- r2 = r2 - 1
 	0032: eaf5;			-- pc = loop if r2 != 0
 
-	-- Main loop
-	0033: ffff;			-- halt
+	-- Init main loop
 
-	[0034..0fff]: 0000;
+	0033: 01e3;			-- r1 = 3 (index counter)
+	0034: 02e1;			-- r2 = 1 (volume counter)
+	0035: 05e8;			-- r5 = 0x0800 (ISR)
+	0036: 85a8;
+	0037: 06e0;			-- r6 = 0 (interrupt check)
+	0038: 7d00;			-- sti r5
+
+	-- Main loop
+
+	0039: ffff;			-- wait while r6 = 0
+
+	[003a..07ff]: 0000;
+
+	-- interrupt service routine
+
+	-- store registers on "stack" (behind ISR)
+	0800: bbfc;
+	0801: bcfc;
+	0802: bdfc;
+
+	-- change counters
+	0803: 1241;			-- r2 = r2 - 1
+	0804: ea09;			-- pc = return if r2 != 0
+	0805: 024f;			-- r2 = 30
+	0806: 8241;
+	0807: 0121;			-- r1 = (r1 + 1) % 4
+	0808: 4123;
+	0809: 0b01;			-- r3 = r0 + r1
+	080a: a460;			-- r4 = [r3]
+	080b: 05ee;			-- r5 = 0xE000
+	080c: 85ac;
+	080d: b4a2;			-- [r5+2] = [0xE002] = r4
+
+	-- return
+	080e: 06e1;			-- r6 = 1
+	080f: 7000;			-- rti
+
+	[0810..0fff]: 0000;
 
 	-- ============
 	-- DATA SECTION
@@ -145,9 +181,16 @@ CONTENT BEGIN
 	101f: 0028;			-- 40 (cols)
 
 	-- animation colors
-	1020: 00ff;			-- cyan
-	1021: 0f0f;			-- magenta
-	1022: 0ff0;			-- yellow
+	1020: 0fff;			-- white
+	1021: 00ff;			-- cyan
+	1022: 0f0f;			-- magenta
+	1023: 0ff0;			-- yellow
 
-	[1023..1fff]: 0000;
+	-- note frequencies (P = 6 250 000 / Hz)
+	1024: 5d51;			-- c4 = 261.63 Hz, P = 23889 = 0x5D51
+	1025: 3e48;			-- g4 = 392.00 Hz, P = 15944 = 0x3E48
+	1026: 4a11;			-- e4 = 329.63 Hz, P = 18961 = 0x4A11
+	1027: 2ea9;			-- c5 = 523.25 Hz, P = 11945 = 0x2EA9
+
+	[1028..1fff]: 0000;
 END;
