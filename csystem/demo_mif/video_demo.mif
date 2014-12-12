@@ -5,8 +5,8 @@ ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-	-- Set tile 0 to 0xAAAAAAAAAAAAAAAA (checkerboard tile)
-	0000: aaaa;				-- (data)
+	-- Set tile 0 to 0xAA55AA55AA55AA55 (checkerboard tile)
+	0000: aa55;				-- (data)
 	0001: a1e0;				-- r1 = 0xAAAA
 	0002: 02fd;				-- r2 = 0xE800 (tile def base address)
 	0003: 824b;
