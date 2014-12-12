@@ -72,7 +72,7 @@ module video(clk, resetn, wen, w_param, w_index, w_val, hdmi_clk, hdmi_d, hdmi_d
 
 		py = y & 11'b00000000111;
 		px = x & 11'b00000000111;
-		pp = tiledef[t][py << 3 | px];
+		pp = tiledef[t][(py << 3) | px];
 		p = (pp ? palmap[m][7:4] : palmap[m][3:0]);
 
 		c = paldef[p];

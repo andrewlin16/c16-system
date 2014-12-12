@@ -79,6 +79,7 @@ module c16(clk, resetn, key, sw, int_event, snd_wen, vid_wen, w_param, w_index, 
 
 	// debug
 	reg [15:0] ss_out;
+	reg we_warn;
 
 	// memory
 	memory mem(addr[12:0], clk, vd, re, we, mem_out);
@@ -89,6 +90,7 @@ module c16(clk, resetn, key, sw, int_event, snd_wen, vid_wen, w_param, w_index, 
 		we <= 0;
 		snd_wen <= 0;
 		vid_wen <= 0;
+		we_warn <= 0;
 
 		last_int_event <= 0;
 	end
@@ -124,6 +126,8 @@ module c16(clk, resetn, key, sw, int_event, snd_wen, vid_wen, w_param, w_index, 
 
 					isr <= 0;
 					int_flag <= 0;
+
+					we_warn <= 0;
 				end
 				s_fetch1: begin
 					addr <= pc;
@@ -225,7 +229,6 @@ module c16(clk, resetn, key, sw, int_event, snd_wen, vid_wen, w_param, w_index, 
 				end
 				s_xst1: begin
 					addr <= va + vb;
-					we <= ((va + vb) & 16'h8000 ? 0 : 1);
 					state <= s_xst2;
 					state_wait <= 2;
 				end
@@ -243,6 +246,12 @@ module c16(clk, resetn, key, sw, int_event, snd_wen, vid_wen, w_param, w_index, 
 						w_val <= vd;
 					end
 					if (!state_wait) begin
+						if (addr[15]) begin
+							we <= 0;
+						end else begin
+							we <= 1;
+							we_warn <= 1;
+						end
 						state <= s_checkint;
 					end
 					state_wait <= state_wait - 1;
@@ -295,10 +304,12 @@ module c16(clk, resetn, key, sw, int_event, snd_wen, vid_wen, w_param, w_index, 
 			ss_out <= regs[sw[8:6]];
 		end else if (sw[5]) begin
 			ss_out <= sw[4] ? va : vb;
+		end else if (sw[4]) begin
+			ss_out <= addr;
 		end else begin
 			ss_out <= inst;
 		end
 	end
 
-	assign debug = {pc[9:0], we, snd_wen, vid_wen, re, state, ss_out};
+	assign debug = {pc[9:0], we_warn, we, re, 1'b0, state, ss_out};
 endmodule
