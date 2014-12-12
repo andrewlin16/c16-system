@@ -1,0 +1,20 @@
+WIDTH=16;
+DEPTH=8192;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+	-- Set ISR
+	0000: 00e3;		-- r0 = 0x0300
+	0001: 8008;
+	0002: 7800;		-- ISR = 0x0300
+	0003: ffff;		-- halt
+
+	[0004..02ff]: 0000;
+
+	-- ISR
+	0300: 7000;		-- rti
+
+	[0301..1fff]: 0000;
+END;
