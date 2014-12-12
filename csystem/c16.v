@@ -1,9 +1,10 @@
-module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debug);
+module c16(clk, resetn, key, sw, int_event, snd_wen, vid_wen, w_param, w_index, w_val, debug);
 	input clk;
 	input resetn;
 
 	input [3:0] key;
 	input [9:0] sw;
+	input int_event;
 
 	output snd_wen;
 	output vid_wen;
@@ -66,6 +67,7 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 	reg [15:0] intpc;
 	reg int_flag;
 	reg int_trig;
+	reg last_int_event;
 
 	// output regs
 	reg snd_wen;
@@ -87,6 +89,8 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 		we <= 0;
 		snd_wen <= 0;
 		vid_wen <= 0;
+
+		last_int_event <= 0;
 	end
 
 	always @(posedge clk) begin
@@ -270,11 +274,19 @@ module c16(clk, resetn, key, sw, snd_wen, vid_wen, w_param, w_index, w_val, debu
 						intpc <= pc;
 						pc <= isr;
 						int_flag <= 1;
+						int_trig <= 0;
 					end
 					state <= s_fetch1;
 				end
 			endcase
 		end
+
+		// interrupt check
+		if (int_event && !last_int_event) begin
+			int_trig <= 1;
+		end
+
+		last_int_event <= int_event;
 	end
 
 	// debugging
