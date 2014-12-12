@@ -39,7 +39,7 @@ CONTENT BEGIN
 	0012: a201;			-- r2 = [r0+1] = 0xF1A1
 	0013: 0002;			-- r0 = r0 + 2 = 0x1016
 	0014: cdfb;			-- r5 = 0x10
-	0015: 02e6;			-- r3 = 6 (num tiles)
+	0015: 03e6;			-- r3 = 6 (num tiles)
 
 	-- load tile + pal map loop
 	0016: a400;			-- r4 = [r0]
